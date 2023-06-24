@@ -91,15 +91,18 @@ class Player(pygame.sprite.Sprite):
 			if not self.attacking and not self.busy:
 				self.status_action = 'idle'
 
-		if self.attacking:
+		elif self.attacking:
 			self.direction.x = 0
 			self.direction.y = 0
 			self.status_action = 'attack'
 
-		if self.busy:
+		elif self.busy:
 			self.direction.x = 0
 			self.direction.y = 0
 			self.status_action = 'interact'
+
+		else:
+			self.status_action = 'walking'
 
 	def move(self, speed):
 		if self.direction.magnitude() != 0:
