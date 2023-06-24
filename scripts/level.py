@@ -47,6 +47,7 @@ class Level:
         # update and draw the game
         self.visable_sprites.custom_draw(self.player)
         self.visable_sprites.update()
+        debug(self.player.status)
 
     
 class YSortCameraGroup(pygame.sprite.Group):
