@@ -3,7 +3,7 @@ from settings import *
 from support import import_sprite_sheet
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, obstacle_sprites):
+	def __init__(self, pos, groups, obstacle_sprites, create_attack, destory_attack):
 		super().__init__(groups)
 		self.image = pygame.image.load('graphics/player/poppy/poppy_init.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -29,6 +29,15 @@ class Player(pygame.sprite.Sprite):
 		self.attack_cooldown = 400
 
 		self.obstacle_sprites = obstacle_sprites
+
+		# weapons
+		self.create_attack = create_attack
+		self.destory_attack = destory_attack
+		self.weapon_index = 0
+		self.weapon = list(weapon_data.keys())[self.weapon_index]
+		self.can_switch_weapon = True
+		self.weapon_switch_time = None
+		self.weapon_switch_cooldown = 400
 
 	def import_player_assets(self):
 		character_path = 'graphics/player/poppy/'
@@ -76,7 +85,8 @@ class Player(pygame.sprite.Sprite):
 				if not self.attacking and not self.busy:
 					self.attacking = True
 					self.attack_time = pygame.time.get_ticks()
-					print('attack')	
+					self.create_attack()
+					print('attack')
 			
 			# interact input
 			if keys[pygame.K_e]:
@@ -85,13 +95,17 @@ class Player(pygame.sprite.Sprite):
 					self.busy_time = pygame.time.get_ticks()
 					print('interact')
 
-	def get_status_action(self):
-		# idle status
-		if self.direction.x == 0 and self.direction.y == 0:
-			if not self.attacking and not self.busy:
-				self.status_action = 'idle'
+			if keys[pygame.K_r] and self.can_switch_weapon():
+				self.can_switch_weapon = False
+				self.weapon_switch_time = pygame.time.get_ticks()
+				self.weapon_index += 1
+				if self.weapon_index >= len(weapon_data.keys()):
+					self.weapon_index = 0
+				self.weapon = list(weapon_data.keys())[self.weapon_index]
+				print('switch weapon')
 
-		elif self.attacking:
+	def get_status_action(self):
+		if self.attacking:
 			self.direction.x = 0
 			self.direction.y = 0
 			self.status_action = 'attack'
@@ -101,8 +115,10 @@ class Player(pygame.sprite.Sprite):
 			self.direction.y = 0
 			self.status_action = 'interact'
 
+		elif self.direction.x == 0 and self.direction.y == 0:
+			self.status_action = 'idle'
 		else:
-			self.status_action = 'walking'
+			self.status_action = 'walk'
 
 	def move(self, speed):
 		if self.direction.magnitude() != 0:
@@ -142,6 +158,11 @@ class Player(pygame.sprite.Sprite):
 		if self.attacking:
 			if current_time - self.attack_time >= self.attack_cooldown:
 				self.attacking = False
+				self.destory_attack()
+
+		if not self.can_switch_weapon:
+			if current_time - self.weapon_switch_time >= self.weapon_switch_cooldown:
+				self.can_switch_weapon = True
 
 	def animate(self):
 		animation = self.animations[self.status_direction + '_' + self.status_action]
