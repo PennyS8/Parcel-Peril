@@ -5,6 +5,7 @@ from player import Player
 from debug import debug
 from support import *
 from pygame import image
+from ui import UI
 
 class Level:
     def __init__(self):
@@ -18,6 +19,9 @@ class Level:
 
         # sprite setup
         self.create_map()
+
+        # user interface
+        self.ui = UI()
 
     def create_map(self):
         layout = {
@@ -47,7 +51,8 @@ class Level:
         # update and draw the game
         self.visable_sprites.custom_draw(self.player)
         self.visable_sprites.update()
-        debug(self.player.status_direction + "_" + self.player.status_action)
+        # debug(self.player.status_direction + "_" + self.player.status_action)
+        self.ui.display(self.player)
 
 
 
