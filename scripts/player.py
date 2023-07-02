@@ -1,6 +1,9 @@
 import pygame 
 from settings import *
 from support import import_sprite_sheet
+from pygame import Vector2
+import math
+from debug import debug
 
 class Player(pygame.sprite.Sprite):
 	def __init__(self, pos, groups, obstacle_sprites):
@@ -30,6 +33,9 @@ class Player(pygame.sprite.Sprite):
 
 		self.obstacle_sprites = obstacle_sprites
 
+		self.mouse_pos = pygame.mouse.get_pos()
+		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
+
 	def import_player_assets(self):
 		character_path = 'graphics/player/poppy/'
 		self.animations = {
@@ -47,12 +53,10 @@ class Player(pygame.sprite.Sprite):
 			# movement input
 			if keys[pygame.K_UP] or keys[pygame.K_w]:
 				self.direction.y = -1
-				# self.status_direction = 'up'
 				self.status_action = 'walk'
 
 			elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
 				self.direction.y = 1
-				# self.status_direction = 'down'
 				self.status_action = 'walk'
 
 			else:
@@ -60,12 +64,10 @@ class Player(pygame.sprite.Sprite):
 
 			if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 				self.direction.x = 1
-				self.status_direction = 'right'
 				self.status_action = 'walk'
 
 			elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
 				self.direction.x = -1
-				self.status_direction = 'left'
 				self.status_action = 'walk'
 
 			else:
@@ -100,6 +102,24 @@ class Player(pygame.sprite.Sprite):
 			self.direction.x = 0
 			self.direction.y = 0
 			self.status_action = 'interact'
+
+		self.mouse_pos = pygame.mouse.get_pos()
+
+		# get status direction
+		player_pos = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+		normalized_mouse_x = self.mouse_pos[0] - player_pos[0]
+		normalized_mouse_y = self.mouse_pos[1] - player_pos[1]
+
+		if normalized_mouse_x != 0:
+			vector = Vector2(normalized_mouse_x, normalized_mouse_y)
+			# (* -1) is to match the unit circle angles, counterclockwise is positive
+			self.status_aim_angle = Vector2(1, 0).angle_to(vector) * -1
+
+		if self.mouse_pos[0] < player_pos[0]:
+			self.status_direction = 'left'
+			# self.status_aim_angle += 180
+		else:
+			self.status_direction = 'right'
 
 	def move(self, speed):
 		if self.direction.magnitude() != 0:
