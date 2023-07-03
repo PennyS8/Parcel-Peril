@@ -33,7 +33,7 @@ class Player(pygame.sprite.Sprite):
 
 		self.obstacle_sprites = obstacle_sprites
 
-		self.mouse_pos = pygame.mouse.get_pos()
+		self.mouse_pos = Vector2(self.rect.centerx +1, self.rect.centery)
 		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
 
 	def import_player_assets(self):
@@ -49,6 +49,7 @@ class Player(pygame.sprite.Sprite):
 	def input(self):
 		if not self.attacking:
 			keys = pygame.key.get_pressed()
+			clicks = pygame.mouse.get_pressed()
 
 			# movement input
 			if keys[pygame.K_UP] or keys[pygame.K_w]:
@@ -74,7 +75,7 @@ class Player(pygame.sprite.Sprite):
 				self.direction.x = 0
 
 			# attack input 
-			if keys[pygame.K_f]:
+			if clicks[0]:
 				if not self.attacking and not self.busy:
 					self.attacking = True
 					self.attack_time = pygame.time.get_ticks()
@@ -117,7 +118,6 @@ class Player(pygame.sprite.Sprite):
 
 		if self.mouse_pos[0] < player_pos[0]:
 			self.status_direction = 'left'
-			# self.status_aim_angle += 180
 		else:
 			self.status_direction = 'right'
 
