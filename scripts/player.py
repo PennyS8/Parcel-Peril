@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
 		# graphics setup
 		self.import_player_assets()
 		self.status_action = 'idle'
-		self.status_direction = 'right'
+		self.status_direction = 'left'
 		self.frame_index = 0
 		self.animation_speed = 0.15
 
@@ -24,7 +24,7 @@ class Player(pygame.sprite.Sprite):
 
 		self.attacking = False
 		self.attack_time = None 
-		self.attack_cooldown = 400
+		self.attack_cooldown = 200
 
 		# weapon
 		self.create_weapon = create_weapon
@@ -70,10 +70,12 @@ class Player(pygame.sprite.Sprite):
 			if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 				self.direction.x = 1
 				self.status_action = 'walk'
+				self.status_direction = 'right'
 
 			elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
 				self.direction.x = -1
 				self.status_action = 'walk'
+				self.status_direction = 'left'
 
 			else:
 				self.direction.x = 0
@@ -85,6 +87,11 @@ class Player(pygame.sprite.Sprite):
 					self.attack_time = pygame.time.get_ticks()
 					self.create_weapon()
 					print('attack')	
+
+					if self.mouse_pos[0] < SCREEN_WIDTH/2:
+						self.status_direction = 'left'
+					else:
+						self.status_direction = 'right'
 
 			# rotate weapons
 			if keys[pygame.K_r]:
@@ -98,6 +105,8 @@ class Player(pygame.sprite.Sprite):
 					self.weapon = list(weapon_data.keys())[self.weapon_index]
 
 	def get_status_action(self):
+		self.mouse_pos = pygame.mouse.get_pos()
+
 		# idle status
 		if self.direction.x == 0 and self.direction.y == 0:
 			if not self.attacking:
@@ -108,25 +117,18 @@ class Player(pygame.sprite.Sprite):
 			self.direction.y = 0
 			self.status_action = 'attack'
 
-		self.mouse_pos = pygame.mouse.get_pos()
-
-		# get status direction
+		# get status aim angle
 		player_pos = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-		normalized_mouse_x = self.mouse_pos[0] - player_pos[0]
-		normalized_mouse_y = self.mouse_pos[1] - player_pos[1]
+		normalized_x = self.mouse_pos[0] - player_pos[0]
+		normalized_y = self.mouse_pos[1] - player_pos[1]
 
 		# get status aim angle
 		# note: angle ranges from [-180 to 180) with angle 0 degrees being negative (i.e. -0.0)
 		# this is helpful when calculating how far to rotate the weapon/arm bone sprite
-		if normalized_mouse_x != 0:
-			vector = Vector2(normalized_mouse_x, normalized_mouse_y)
+		if normalized_x != 0:
+			vector = Vector2(normalized_x, normalized_y)
 			# (* -1) is to match the unit circle angles, counterclockwise is positive
 			self.status_aim_angle = Vector2(1, 0).angle_to(vector) * -1
-
-		if self.mouse_pos[0] < player_pos[0]:
-			self.status_direction = 'left'
-		else:
-			self.status_direction = 'right'
 
 	def move(self, speed):
 		if self.direction.magnitude() != 0:
@@ -157,7 +159,6 @@ class Player(pygame.sprite.Sprite):
 
 	def cooldowns(self):
 		current_time = pygame.time.get_ticks()
-
 		
 		# attack cooldowns
 		if self.attacking:
@@ -168,7 +169,6 @@ class Player(pygame.sprite.Sprite):
 		if not self.can_switch_weapon:
 			if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
 				self.can_switch_weapon = True
-
 
 	def animate(self):
 		animation = self.animations[self.status_direction + '_' + self.status_action]

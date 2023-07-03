@@ -38,7 +38,7 @@ def import_sprite_sheet(full_path, sprite_width, sprite_height, margin_x, margin
             frame_x = col * sprite_width + margin_x
             frame_y = row * sprite_height + margin_y
 
-            frame = pygame.Surface((sprite_width, sprite_height)).convert_alpha()
+            frame = pygame.Surface((sprite_width, sprite_height))
             frame.blit(sheet, (0, 0), (frame_x, frame_y, sprite_width, sprite_height))
 
             frame.set_colorkey((255, 0, 255))
@@ -57,11 +57,3 @@ def rotate_center(image, angle, x, y):
     new_rect = rotated_image.get_rect(center = image.get_rect(center = (x, y)).center)
 
     return rotated_image, new_rect
-
-# rotates an image and blits it
-def blit_rotate_center(surf, image, topleft, angle):
-
-    rotated_image = pygame.transform.rotate(image, angle)
-    new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
-
-    surf.blit(rotated_image, new_rect)
