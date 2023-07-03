@@ -6,6 +6,7 @@ from debug import debug
 from support import *
 from pygame import image
 from ui import UI
+from weapon import Weapon
 
 class Level:
     def __init__(self):
@@ -16,6 +17,9 @@ class Level:
         # sprite group setup
         self.visable_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
+
+        # weapon sprites
+        self.current_weapon = None
 
         # sprite setup
         self.create_map()
@@ -44,14 +48,23 @@ class Level:
                     if style == 'block':
                         surf = graphics['block'][int(col)]
                         Tile((x, y), [self.obstacles_sprites, self.visable_sprites], 'block', surf)
-                        
-        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites)
+
+        # putting 'self.create_weapon' without parentheses passes the function as an object instead of calling the function!
+        # this allows us to call create_weapon() function from within the player class!!!
+        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites, self.create_weapon, self.destroy_weapon)
+
+    def create_weapon(self):
+        self.current_weapon = Weapon(self.player, [self.visable_sprites])
+
+    def destroy_weapon(self):
+        if self.current_weapon:
+            self.current_weapon.kill()
+        self.current_weapon = None
 
     def run(self):
         # update and draw the game
         self.visable_sprites.custom_draw(self.player)
         self.visable_sprites.update()
-        # debug(self.player.status_direction + "_" + self.player.status_action)
         self.ui.display(self.player)
 
 
