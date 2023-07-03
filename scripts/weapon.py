@@ -8,7 +8,7 @@ class Weapon(pygame.sprite.Sprite):
         rot_angle = player.status_aim_angle
 
         # graphics
-        full_path = f'graphics/player/poppy/weapons/{player.weapon}.png'
+        full_path = f'graphics/weapons/{player.weapon}.png'
         self.image = pygame.image.load(full_path).convert()
 
         # position and rotation

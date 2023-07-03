@@ -10,11 +10,11 @@ class UI:
         # bar setup
         self.health_bar_rect = pygame.Rect(10, 10, HEALTH_BAR_WIDTH, BAR_HEIGHT)
 
-        # cenvert weapon dictionary
+        # convert weapon dictionary
         self.weapon_graphics = []
-        for weapon in weapon_data[].values():
-            path = weapon['graphic']
-            weapon = pygame.image.load(path).convert_alpha()
+        for weapon in weapon_data.values():
+            path = weapon['graphic'].split('.')[0] + '_icon.png'
+            weapon = pygame.image.load(path).convert()
             self.weapon_graphics.append(weapon)
 
     def show_bar(self, current, max_amount, bg_rect, color):
@@ -32,7 +32,7 @@ class UI:
         pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
     def show_exp(self, exp):
-        text_surf = self.font.render(str(int(exp)), False, TEXT_COLOR)
+        text_surf = self.font.render('EXP: ' + str(int(exp)), False, TEXT_COLOR)
         x = SCREEN_WIDTH - 20
         y = SCREEN_HEIGHT - 20
         text_rect = text_surf.get_rect(bottomright = (x, y))
@@ -45,19 +45,19 @@ class UI:
         bg_rect = pygame.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
         if not has_switched:
-            pygame.draw.rect(self.display_surface, UI_BORDER_COLOR_ACTIVE, bg_rect)
+            pygame.draw.rect(self.display_surface, UI_BORDER_COLOR_ACTIVE, bg_rect, 3)
         else:
-            pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
+            pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
         return bg_rect
 
     def weapon_overlay(self, weapon_index, has_switched):
-        # self.selection_box(10, SCREEN_HEIGHT - ITEM_BOX_SIZE - 10)
+        self.selection_box(10, SCREEN_HEIGHT - ITEM_BOX_SIZE - 10, has_switched)
         bg_rect = self.selection_box(10, 630, has_switched)
-        weapon_surface = weapon_graphics[weapon_index]
+        weapon_surface = self.weapon_graphics[weapon_index]
         weapon_rect = weapon_surface.get_rect(center = bg_rect.center)
         
-        self.display_surface.blit(weapon_surf, weapon_rect)
+        self.display_surface.blit(weapon_surface, weapon_rect)
 
     def display(self, player):
         self.show_bar(player.health, player.stats['health'], self.health_bar_rect, HEALTH_COLOR)
@@ -65,4 +65,3 @@ class UI:
         self.show_exp(player.exp)
 
         self.weapon_overlay(player.weapon_index, player.can_switch_weapon)
-        self.selection_box(10 + ITEM_BOX_SIZE + 10, SCREEN_HEIGHT - ITEM_BOX_SIZE - 10)
