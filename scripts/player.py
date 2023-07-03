@@ -20,11 +20,10 @@ class Player(pygame.sprite.Sprite):
 
 		# movement 
 		self.direction = pygame.math.Vector2()
-		self.speed = 5
 
 		self.attacking = False
 		self.attack_time = None 
-		self.attack_cooldown = 200
+		self.attack_cooldown = 150
 
 		# weapon
 		self.create_weapon = create_weapon
@@ -35,10 +34,17 @@ class Player(pygame.sprite.Sprite):
 		self.weapon_switch_time = None
 		self.switch_duration_cooldown = 200
 
-		self.obstacle_sprites = obstacle_sprites
+		# stats
+		self.stats = {'health': 100, 'speed': 5, 'attack': 10}
+		self.health = self.stats['health']
+		self.exp = 123
+		self.speed = self.stats['speed']
 
+		# point and click
 		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
 		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
+
+		self.obstacle_sprites = obstacle_sprites
 
 	def import_player_assets(self):
 		character_path = 'graphics/player/poppy/'
