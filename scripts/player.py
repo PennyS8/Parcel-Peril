@@ -2,11 +2,10 @@ import pygame
 from settings import *
 from support import import_sprite_sheet
 from pygame import Vector2
-import math
 from debug import debug
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, obstacle_sprites, create_weapon):
+	def __init__(self, pos, groups, obstacle_sprites, create_weapon, destroy_weapon):
 		super().__init__(groups)
 		self.image = pygame.image.load('graphics/player/poppy/poppy_init.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -33,9 +32,12 @@ class Player(pygame.sprite.Sprite):
 
 		# weapon
 		self.create_weapon = create_weapon
-		self.weapon_index = 1
+		self.destroy_weapon = destroy_weapon
+		self.weapon_index = 0
 		self.weapon = list(weapon_data.keys())[self.weapon_index]
-		print('weapon_equiped: ' + self.weapon)
+		self.can_switch_weapon = True
+		self.weapon_switch_time = None
+		self.switch_duration_cooldown = 200
 
 		self.obstacle_sprites = obstacle_sprites
 
@@ -94,6 +96,17 @@ class Player(pygame.sprite.Sprite):
 					self.busy = True
 					self.busy_time = pygame.time.get_ticks()
 					print('interact')
+
+			# rotate weapons
+			if keys[pygame.K_r]:
+				if not self.attacking and self.can_switch_weapon:
+					self.can_switch_weapon = False
+					self.weapon_switch_time = pygame.time.get_ticks()
+					self.weapon_index += 1
+					if self.weapon_index >= len(list(weapon_data.keys())):
+						self.weapon_index = 0
+					print('weapon_index: ' + str(self.weapon_index))
+					self.weapon = list(weapon_data.keys())[self.weapon_index]
 
 	def get_status_action(self):
 		# idle status
@@ -165,10 +178,17 @@ class Player(pygame.sprite.Sprite):
 		if self.busy:
 			if current_time - self.busy_time >= self.busy_cooldown:
 				self.busy = False
+		
 		# attack cooldowns
 		if self.attacking:
 			if current_time - self.attack_time >= self.attack_cooldown:
 				self.attacking = False
+				self.destroy_weapon()
+
+		if not self.can_switch_weapon:
+			if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
+				self.can_switch_weapon = True
+
 
 	def animate(self):
 		animation = self.animations[self.status_direction + '_' + self.status_action]

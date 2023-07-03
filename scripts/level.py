@@ -17,6 +17,9 @@ class Level:
         self.visable_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
 
+        # weapon sprites
+        self.current_weapon = None
+
         # sprite setup
         self.create_map()
 
@@ -42,12 +45,17 @@ class Level:
                         surf = graphics['block'][int(col)]
                         Tile((x, y), [self.obstacles_sprites, self.visable_sprites], 'block', surf)
 
-        # putting 'self.create_weapon' without parentheses passes the function not the object!!!
+        # putting 'self.create_weapon' without parentheses passes the function as an object instead of calling the function!
         # this allows us to call create_weapon() function from within the player class!!!
-        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites, self.create_weapon)
+        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites, self.create_weapon, self.destroy_weapon)
 
     def create_weapon(self):
-        Weapon(self.player, [self.visable_sprites])
+        self.current_weapon = Weapon(self.player, [self.visable_sprites])
+
+    def destroy_weapon(self):
+        if self.current_weapon:
+            self.current_weapon.kill()
+        self.current_weapon = None
 
     def run(self):
         # update and draw the game
