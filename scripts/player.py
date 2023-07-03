@@ -2,11 +2,10 @@ import pygame
 from settings import *
 from support import import_sprite_sheet
 from pygame import Vector2
-import math
 from debug import debug
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, obstacle_sprites):
+	def __init__(self, pos, groups, obstacle_sprites, create_weapon, destroy_weapon):
 		super().__init__(groups)
 		self.image = pygame.image.load('graphics/player/poppy/poppy_init.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -15,7 +14,7 @@ class Player(pygame.sprite.Sprite):
 		# graphics setup
 		self.import_player_assets()
 		self.status_action = 'idle'
-		self.status_direction = 'right'
+		self.status_direction = 'left'
 		self.frame_index = 0
 		self.animation_speed = 0.15
 
@@ -23,24 +22,29 @@ class Player(pygame.sprite.Sprite):
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
 
-		self.busy = False
-		self.busy_time = None
-		self.busy_cooldown = 400
-
 		self.attacking = False
 		self.attack_time = None 
-		self.attack_cooldown = 400
+		self.attack_cooldown = 200
+
+		# weapon
+		self.create_weapon = create_weapon
+		self.destroy_weapon = destroy_weapon
+		self.weapon_index = 0
+		self.weapon = list(weapon_data.keys())[self.weapon_index]
+		self.can_switch_weapon = True
+		self.weapon_switch_time = None
+		self.switch_duration_cooldown = 200
 
 		self.obstacle_sprites = obstacle_sprites
 
-		self.mouse_pos = Vector2(self.rect.centerx +1, self.rect.centery)
+		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
 		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
 
 	def import_player_assets(self):
 		character_path = 'graphics/player/poppy/'
 		self.animations = {
-			'left_walk': [], 	'left_idle':[], 	'left_attack':[], 	'left_interact':[],
-			'right_walk': [], 	'right_idle':[], 	'right_attack':[], 	'right_interact':[]}
+			'left_walk': [], 	'left_idle':[], 	'left_attack':[],
+			'right_walk': [], 	'right_idle':[], 	'right_attack':[]}
 
 		for animation in self.animations.keys():
 			full_path = character_path + animation + '.png'
@@ -66,32 +70,46 @@ class Player(pygame.sprite.Sprite):
 			if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 				self.direction.x = 1
 				self.status_action = 'walk'
+				self.status_direction = 'right'
 
 			elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
 				self.direction.x = -1
 				self.status_action = 'walk'
+				self.status_direction = 'left'
 
 			else:
 				self.direction.x = 0
 
 			# attack input 
 			if clicks[0]:
-				if not self.attacking and not self.busy:
+				if not self.attacking:
 					self.attacking = True
 					self.attack_time = pygame.time.get_ticks()
+					self.create_weapon()
 					print('attack')	
-			
-			# interact input
-			if keys[pygame.K_e]:
-				if not self.attacking and not self.busy:
-					self.busy = True
-					self.busy_time = pygame.time.get_ticks()
-					print('interact')
+
+					if self.mouse_pos[0] < SCREEN_WIDTH/2:
+						self.status_direction = 'left'
+					else:
+						self.status_direction = 'right'
+
+			# rotate weapons
+			if keys[pygame.K_r]:
+				if not self.attacking and self.can_switch_weapon:
+					self.can_switch_weapon = False
+					self.weapon_switch_time = pygame.time.get_ticks()
+					self.weapon_index += 1
+					if self.weapon_index >= len(list(weapon_data.keys())):
+						self.weapon_index = 0
+					print('weapon_index: ' + str(self.weapon_index))
+					self.weapon = list(weapon_data.keys())[self.weapon_index]
 
 	def get_status_action(self):
+		self.mouse_pos = pygame.mouse.get_pos()
+
 		# idle status
 		if self.direction.x == 0 and self.direction.y == 0:
-			if not self.attacking and not self.busy:
+			if not self.attacking:
 				self.status_action = 'idle'
 
 		if self.attacking:
@@ -99,27 +117,18 @@ class Player(pygame.sprite.Sprite):
 			self.direction.y = 0
 			self.status_action = 'attack'
 
-		if self.busy:
-			self.direction.x = 0
-			self.direction.y = 0
-			self.status_action = 'interact'
-
-		self.mouse_pos = pygame.mouse.get_pos()
-
-		# get status direction
+		# get status aim angle
 		player_pos = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-		normalized_mouse_x = self.mouse_pos[0] - player_pos[0]
-		normalized_mouse_y = self.mouse_pos[1] - player_pos[1]
+		normalized_x = self.mouse_pos[0] - player_pos[0]
+		normalized_y = self.mouse_pos[1] - player_pos[1]
 
-		if normalized_mouse_x != 0:
-			vector = Vector2(normalized_mouse_x, normalized_mouse_y)
+		# get status aim angle
+		# note: angle ranges from [-180 to 180) with angle 0 degrees being negative (i.e. -0.0)
+		# this is helpful when calculating how far to rotate the weapon/arm bone sprite
+		if normalized_x != 0:
+			vector = Vector2(normalized_x, normalized_y)
 			# (* -1) is to match the unit circle angles, counterclockwise is positive
 			self.status_aim_angle = Vector2(1, 0).angle_to(vector) * -1
-
-		if self.mouse_pos[0] < player_pos[0]:
-			self.status_direction = 'left'
-		else:
-			self.status_direction = 'right'
 
 	def move(self, speed):
 		if self.direction.magnitude() != 0:
@@ -150,15 +159,16 @@ class Player(pygame.sprite.Sprite):
 
 	def cooldowns(self):
 		current_time = pygame.time.get_ticks()
-
-		# other input cooldowns like interact
-		if self.busy:
-			if current_time - self.busy_time >= self.busy_cooldown:
-				self.busy = False
+		
 		# attack cooldowns
 		if self.attacking:
 			if current_time - self.attack_time >= self.attack_cooldown:
 				self.attacking = False
+				self.destroy_weapon()
+
+		if not self.can_switch_weapon:
+			if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
+				self.can_switch_weapon = True
 
 	def animate(self):
 		animation = self.animations[self.status_direction + '_' + self.status_action]
