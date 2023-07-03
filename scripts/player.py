@@ -22,10 +22,6 @@ class Player(pygame.sprite.Sprite):
 		self.direction = pygame.math.Vector2()
 		self.speed = 5
 
-		self.busy = False
-		self.busy_time = None
-		self.busy_cooldown = 400
-
 		self.attacking = False
 		self.attack_time = None 
 		self.attack_cooldown = 400
@@ -47,8 +43,8 @@ class Player(pygame.sprite.Sprite):
 	def import_player_assets(self):
 		character_path = 'graphics/player/poppy/'
 		self.animations = {
-			'left_walk': [], 	'left_idle':[], 	'left_attack':[], 	'left_interact':[],
-			'right_walk': [], 	'right_idle':[], 	'right_attack':[], 	'right_interact':[]}
+			'left_walk': [], 	'left_idle':[], 	'left_attack':[],
+			'right_walk': [], 	'right_idle':[], 	'right_attack':[]}
 
 		for animation in self.animations.keys():
 			full_path = character_path + animation + '.png'
@@ -84,18 +80,11 @@ class Player(pygame.sprite.Sprite):
 
 			# attack input 
 			if clicks[0]:
-				if not self.attacking and not self.busy:
+				if not self.attacking:
 					self.attacking = True
 					self.attack_time = pygame.time.get_ticks()
 					self.create_weapon()
 					print('attack')	
-			
-			# interact input
-			if keys[pygame.K_e]:
-				if not self.attacking and not self.busy:
-					self.busy = True
-					self.busy_time = pygame.time.get_ticks()
-					print('interact')
 
 			# rotate weapons
 			if keys[pygame.K_r]:
@@ -111,18 +100,13 @@ class Player(pygame.sprite.Sprite):
 	def get_status_action(self):
 		# idle status
 		if self.direction.x == 0 and self.direction.y == 0:
-			if not self.attacking and not self.busy:
+			if not self.attacking:
 				self.status_action = 'idle'
 
 		if self.attacking:
 			self.direction.x = 0
 			self.direction.y = 0
 			self.status_action = 'attack'
-
-		if self.busy:
-			self.direction.x = 0
-			self.direction.y = 0
-			self.status_action = 'interact'
 
 		self.mouse_pos = pygame.mouse.get_pos()
 
@@ -174,10 +158,6 @@ class Player(pygame.sprite.Sprite):
 	def cooldowns(self):
 		current_time = pygame.time.get_ticks()
 
-		# other input cooldowns like interact
-		if self.busy:
-			if current_time - self.busy_time >= self.busy_cooldown:
-				self.busy = False
 		
 		# attack cooldowns
 		if self.attacking:
