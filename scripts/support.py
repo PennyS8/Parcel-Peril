@@ -49,3 +49,19 @@ def import_sprite_sheet(full_path, sprite_width, sprite_height, margin_x, margin
         print('ERROR: No frames found in sprite sheet: ' + full_path)
 
     return frames
+
+# rotates an image about its center
+def rotate_center(image, angle, x, y):
+
+    rotated_image = pygame.transform.rotate(image, angle)
+    new_rect = rotated_image.get_rect(center = image.get_rect(center = (x, y)).center)
+
+    return rotated_image, new_rect
+
+# rotates an image and blits it
+def blit_rotate_center(surf, image, topleft, angle):
+
+    rotated_image = pygame.transform.rotate(image, angle)
+    new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
+
+    surf.blit(rotated_image, new_rect)

@@ -5,6 +5,7 @@ from player import Player
 from debug import debug
 from support import *
 from pygame import image
+from weapon import Weapon
 
 class Level:
     def __init__(self):
@@ -40,13 +41,19 @@ class Level:
                     if style == 'block':
                         surf = graphics['block'][int(col)]
                         Tile((x, y), [self.obstacles_sprites, self.visable_sprites], 'block', surf)
-                        
-        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites)
+
+        # putting 'self.create_weapon' without parentheses passes the function not the object!!!
+        # this allows us to call create_weapon() function from within the player class!!!
+        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites, self.create_weapon)
+
+    def create_weapon(self):
+        Weapon(self.player, [self.visable_sprites])
 
     def run(self):
         # update and draw the game
         self.visable_sprites.custom_draw(self.player)
         self.visable_sprites.update()
+        debug(self.player.status_aim_angle)
 
 
 

@@ -6,7 +6,7 @@ import math
 from debug import debug
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, obstacle_sprites):
+	def __init__(self, pos, groups, obstacle_sprites, create_weapon):
 		super().__init__(groups)
 		self.image = pygame.image.load('graphics/player/poppy/poppy_init.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = pos)
@@ -31,9 +31,15 @@ class Player(pygame.sprite.Sprite):
 		self.attack_time = None 
 		self.attack_cooldown = 400
 
+		# weapon
+		self.create_weapon = create_weapon
+		self.weapon_index = 1
+		self.weapon = list(weapon_data.keys())[self.weapon_index]
+		print('weapon_equiped: ' + self.weapon)
+
 		self.obstacle_sprites = obstacle_sprites
 
-		self.mouse_pos = Vector2(self.rect.centerx +1, self.rect.centery)
+		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
 		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
 
 	def import_player_assets(self):
@@ -79,6 +85,7 @@ class Player(pygame.sprite.Sprite):
 				if not self.attacking and not self.busy:
 					self.attacking = True
 					self.attack_time = pygame.time.get_ticks()
+					self.create_weapon()
 					print('attack')	
 			
 			# interact input
@@ -111,6 +118,9 @@ class Player(pygame.sprite.Sprite):
 		normalized_mouse_x = self.mouse_pos[0] - player_pos[0]
 		normalized_mouse_y = self.mouse_pos[1] - player_pos[1]
 
+		# get status aim angle
+		# note: angle ranges from [-180 to 180) with angle 0 degrees being negative (i.e. -0.0)
+		# this is helpful when calculating how far to rotate the weapon/arm bone sprite
 		if normalized_mouse_x != 0:
 			vector = Vector2(normalized_mouse_x, normalized_mouse_y)
 			# (* -1) is to match the unit circle angles, counterclockwise is positive
