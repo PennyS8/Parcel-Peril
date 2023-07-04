@@ -41,7 +41,7 @@ def import_sprite_sheet(full_path, sprite_width, sprite_height, margin_x, margin
             frame = pygame.Surface((sprite_width, sprite_height))
             frame.blit(sheet, (0, 0), (frame_x, frame_y, sprite_width, sprite_height))
 
-            frame.set_colorkey((255, 0, 255))
+            frame.set_colorkey(GREEN_SCREEN_COLOR)
 
             frames.append(frame)
 

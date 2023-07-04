@@ -21,6 +21,9 @@ TEXT_COLOR = '#EEEEEE'
 HEALTH_COLOR = 'red'
 UI_BORDER_COLOR_ACTIVE = 'gold'
 
+# graphics 'green' screen
+GREEN_SCREEN_COLOR = (255, 0, 255)
+
 # note: weapon sprite imgs are centered at the shoulder, then we can rotate around the center of the img an not need to
 # translate them to keep the sholder matching with the player body
 weapon_data = {

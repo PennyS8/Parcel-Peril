@@ -42,7 +42,7 @@ class Player(pygame.sprite.Sprite):
 
 		# point and click
 		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
-		self.status_aim_angle = Vector2(self.rect.centerx, self.rect.centery)
+		self.status_aim_angle = 0
 
 		self.obstacle_sprites = obstacle_sprites
 

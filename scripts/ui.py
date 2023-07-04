@@ -59,9 +59,17 @@ class UI:
         
         self.display_surface.blit(weapon_surface, weapon_rect)
 
+    def crosshair(self, mouse_x, mouse_y):
+        crosshair_surface = pygame.image.load('graphics/other/crosshair.png').convert_alpha()
+        crosshair_surface.set_colorkey(GREEN_SCREEN_COLOR)
+        crosshair_rect = crosshair_surface.get_rect(center = (mouse_x, mouse_y))
+        self.display_surface.blit(crosshair_surface, crosshair_rect)
+
     def display(self, player):
         self.show_bar(player.health, player.stats['health'], self.health_bar_rect, HEALTH_COLOR)
         
         self.show_exp(player.exp)
 
         self.weapon_overlay(player.weapon_index, player.can_switch_weapon)
+
+        self.crosshair(player.mouse_pos[0], player.mouse_pos[1])
