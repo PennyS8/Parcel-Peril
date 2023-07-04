@@ -34,15 +34,16 @@ class Player(pygame.sprite.Sprite):
 		self.weapon_switch_time = None
 		self.switch_duration_cooldown = 200
 
+		# point and click
+		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
+		self.status_aim_angle = 0
+		self.holding_click = False
+
 		# stats
 		self.stats = {'health': 100, 'speed': 5, 'attack': 10}
 		self.health = self.stats['health']
 		self.exp = 123
 		self.speed = self.stats['speed']
-
-		# point and click
-		self.mouse_pos = Vector2(self.rect.centerx, self.rect.centery)
-		self.status_aim_angle = 0
 
 		self.obstacle_sprites = obstacle_sprites
 
@@ -88,8 +89,9 @@ class Player(pygame.sprite.Sprite):
 
 			# attack input 
 			if clicks[0]:
-				if not self.attacking:
+				if not self.attacking and not self.holding_click:
 					self.attacking = True
+					self.holding_click = True
 					self.attack_time = pygame.time.get_ticks()
 					self.create_weapon()
 					print('attack')	
@@ -98,6 +100,11 @@ class Player(pygame.sprite.Sprite):
 						self.status_direction = 'left'
 					else:
 						self.status_direction = 'right'
+
+			# checks that the player is not holding down the attack button,
+			# they must click each time to attack
+			if not clicks[0]:
+				self.holding_click = False
 
 			# rotate weapons
 			if keys[pygame.K_r]:
