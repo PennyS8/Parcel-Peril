@@ -11,6 +11,8 @@ class Game:
         pygame.display.set_caption('Parcel Peril')
         self.clock = pygame.time.Clock()
 
+        pygame.mouse.set_visible(False)
+
         self.level = Level()
 
     def run(self):
