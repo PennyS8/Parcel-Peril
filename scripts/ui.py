@@ -53,7 +53,7 @@ class UI:
 
     def weapon_overlay(self, weapon_index, has_switched):
         self.selection_box(10, SCREEN_HEIGHT - ITEM_BOX_SIZE - 10, has_switched)
-        bg_rect = self.selection_box(10, 630, has_switched)
+        bg_rect = self.selection_box(10, SCREEN_HEIGHT - 90, has_switched)
         weapon_surface = self.weapon_graphics[weapon_index]
         weapon_rect = weapon_surface.get_rect(center = bg_rect.center)
         
