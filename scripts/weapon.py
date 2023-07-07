@@ -9,7 +9,7 @@ class Weapon(pygame.sprite.Sprite):
 
         # graphics
         full_path = f'graphics/weapons/{player.weapon}.png'
-        self.image = pygame.image.load(full_path).convert()
+        self.image = pygame.image.load(full_path).convert_alpha()
 
         # position and rotation
         if player.mouse_pos[0] >= SCREEN_WIDTH/2: # direction == 'right'
