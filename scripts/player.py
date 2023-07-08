@@ -34,7 +34,7 @@ class Player(pygame.sprite.Sprite):
 
         # weapon
         self.weapon_index = 0
-        self.weapon = list(weapon_data.keys())[self.weapon_index]
+        self.weapon_equipped = list(weapon_data.keys())[self.weapon_index]
 
         self.attacking = False
         self.attack_time = None 
@@ -78,12 +78,12 @@ class Player(pygame.sprite.Sprite):
             if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 self.direction.x = 1
                 self.status_action = 'walk'
-                self.status_direction = 'right'
+                # self.status_direction = 'right'
 
             elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 self.direction.x = -1
                 self.status_action = 'walk'
-                self.status_direction = 'left'
+                # self.status_direction = 'left'
 
             else:
                 self.direction.x = 0
@@ -115,9 +115,9 @@ class Player(pygame.sprite.Sprite):
                     if self.weapon_index >= len(list(weapon_data.keys())):
                         self.weapon_index = 0
                     print('weapon_index: ' + str(self.weapon_index))
-                    self.weapon = list(weapon_data.keys())[self.weapon_index]
+                    self.weapon_equipped = list(weapon_data.keys())[self.weapon_index]
 
-    def get_status_action(self):
+    def get_status(self):
         self.mouse_pos = pygame.mouse.get_pos()
 
         # idle status
@@ -130,7 +130,8 @@ class Player(pygame.sprite.Sprite):
             self.direction.y = 0
             self.status_action = 'attack'
 
-        # get status aim angle
+        # get mouse position relative to player position
+        # this calc assumes the player is at SCREEN_WIDTH/2, SCREEN_HEIGHT/2
         player_pos = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
         normalized_x = self.mouse_pos[0] - player_pos[0]
         normalized_y = self.mouse_pos[1] - player_pos[1]
@@ -143,10 +144,22 @@ class Player(pygame.sprite.Sprite):
             # (* -1) is to match the unit circle angles, counterclockwise is positive
             self.status_aim_angle = Vector2(1, 0).angle_to(vector) * -1
 
+        if normalized_x >= 0:
+            self.status_direction = 'right'
+        else:
+            self.status_direction = 'left'
+
+        # if dead
         if self.health == 0:
+            # remove the weapon sprite
             if self.current_weapon:
                 self.weapon_obj.current_weapon.kill()
                 self.current_weapon = None
+            # TODO: death animation
+            # TODO: "you died" screen
+
+        # updates status of weapon sprite
+        self.weapon_obj.set_status(self.status_aim_angle, self.mouse_pos, self.rect.center, self.weapon_equipped)
 
     def move(self, speed):
         if self.direction.magnitude() != 0:
@@ -202,6 +215,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.input()
         self.cooldowns()
-        self.get_status_action()
+        self.get_status()
+        self.weapon_obj.update()
         self.animate()
         self.move(self.speed)

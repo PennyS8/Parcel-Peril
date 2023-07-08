@@ -6,7 +6,6 @@ from debug import debug
 from support import *
 from pygame import image
 from ui import UI
-from weapon import Weapon
 
 class Level:
     def __init__(self):
