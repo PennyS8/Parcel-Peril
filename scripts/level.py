@@ -6,7 +6,6 @@ from debug import debug
 from support import *
 from pygame import image
 from ui import UI
-from weapon import Weapon
 
 class Level:
     def __init__(self):
@@ -48,15 +47,7 @@ class Level:
 
         # putting 'self.create_weapon' without parentheses passes the function as an object instead of calling the function!
         # this allows us to call create_weapon() function from within the player class!!!
-        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites, self.create_weapon, self.destroy_weapon)
-
-    def create_weapon(self):
-        self.current_weapon = Weapon(self.player, [self.visable_sprites])
-
-    def destroy_weapon(self):
-        if self.current_weapon:
-            self.current_weapon.kill()
-        self.current_weapon = None
+        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites)
 
     def run(self):
         # update and draw the game
