@@ -7,7 +7,7 @@ class Game:
 
         # general setup
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
         pygame.display.set_caption('Parcel Peril')
         self.clock = pygame.time.Clock()
 

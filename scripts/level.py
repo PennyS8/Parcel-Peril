@@ -6,6 +6,7 @@ from debug import debug
 from support import *
 from pygame import image
 from ui import UI
+from enemy import Enemy
 
 class Level:
     def __init__(self):
@@ -25,8 +26,9 @@ class Level:
 
     def create_map(self):
         layout = {
-            'boundry': import_csv_layout('graphics/maps/conveyor_hell/Boundry.csv'),
-            'block': import_csv_layout('graphics/maps/conveyor_hell/Blocks.csv')
+            'boundry': import_csv_layout('graphics/maps/conveyor_hell/boundry.csv'),
+            'block': import_csv_layout('graphics/maps/conveyor_hell/blocks.csv'),
+            'entities': import_csv_layout('graphics/maps/conveyor_hell/entities.csv')
         }
         graphics = {
             'block': import_folder('graphics/maps/conveyor_hell_tileset')
@@ -41,13 +43,16 @@ class Level:
 
                     if style == 'boundry':
                         Tile((x, y), [self.obstacles_sprites], 'invisible')
+
                     if style == 'block':
                         surf = graphics['block'][int(col)]
                         Tile((x, y), [self.obstacles_sprites, self.visable_sprites], 'block', surf)
 
-        # putting 'self.create_weapon' without parentheses passes the function as an object instead of calling the function!
-        # this allows us to call create_weapon() function from within the player class!!!
-        self.player = Player((6 * TILESIZE, 7 * TILESIZE), [self.visable_sprites], self.obstacles_sprites)
+                    if style == 'entities':
+                        if col == '4': # this number is from the 'tiled' index of the player entity
+                            self.player = Player((x, y), [self.visable_sprites], self.obstacles_sprites)
+                        elif col == '10': # this number is from the 'tiled' index of the enemy entity
+                            Enemy('small_cube', (x, y), [self.visable_sprites], self.obstacles_sprites)
 
     def run(self):
         # update and draw the game
