@@ -43,7 +43,7 @@ class Player(Entity):
         self.weapon_obj = Weapon(self, groups)
 
         # damage timer
-        self.vulverable = True
+        self.vulnerable = True
         self.hurt_time = None
         self.invulnerability_duration = 500
 
@@ -174,8 +174,8 @@ class Player(Entity):
             if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
                 self.can_switch_weapon = True
 
-        if not self.vulverable:
-            if current_time - self.weapon_switch_time >= self.invulnerability_duration:
+        if not self.vulnerable:
+            if current_time - self.hurt_time >= self.invulnerability_duration:
                 self.vulnerable = True
 
     def animate(self):

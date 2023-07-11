@@ -136,7 +136,7 @@ class Enemy(Entity):
         self.move(self.speed)
         # this fn is not being used rn because we do not have animated sprites
         # self.animate()
-        self.cooldown()
+        self.cooldowns()
         self.check_death()
 
     def enemy_update(self, player):
