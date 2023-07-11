@@ -5,7 +5,7 @@ from support import *
 from pygame import Vector2
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacle_sprites):
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player):
 
         # general setup
         super().__init__(groups)
@@ -32,6 +32,17 @@ class Enemy(Entity):
         self.notice_radius = monster_info['alert_radius']
         self.attack_type = monster_info['attack_type']
 
+        # player interaction
+        self.can_attack = True
+        self.attack_time = None
+        self.attack_cooldown = monster_info['attack_cooldown']
+        self.damage_player = damage_player
+
+        # invincibility timer
+        self.vulnerable = True
+        self.hit_time = None
+        self. invincibility_duration = 300
+
     def import_graphics(self, name):
         pass
         enemy_path = f'graphics/enemies/{name}.png'
@@ -51,7 +62,9 @@ class Enemy(Entity):
     def get_status(self, player):
         distance = self.get_player_distance_direction(player)[0]
         
-        if distance <= self.attack_radius:
+        if distance <= self.attack_radius and self.can_attack:
+            if self.status != 'attack':
+                self.frame_index = 0
             self.status = 'attack'
         elif distance <= self.notice_radius:
             self.status = 'move'
@@ -59,15 +72,72 @@ class Enemy(Entity):
             self.status = 'idle'
 
     def actions(self, player):
-        if self.status == 'attack':
-            print('attack')
+        if self.status == 'attack' and self.can_attack:
+            self.attack_time = pygame.time.get_ticks()
+            self.can_attack = False # this line will be redundant when we use animate()
+            self.damage_player(self.attack_damage, self.attack_type)
+            print('enemy_attack')
         elif self.status =='move':
             self.direction = self.get_player_distance_direction(player)[1]
         else: # idle
             self.direction = Vector2()
 
+    def animate(self):
+        # this is a copy of the player animation function (they will look very similar)
+        animation = self.animations[self.status_direction + '_' + self.status_action]
+
+        # loop over the frame index 
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(self.animations[self.status]):
+            if self.status == 'attack':
+                self.can_attack = False
+            self.frame_index = 0
+
+        # set the image
+        self.image = animation[int(self.frame_index)]
+        self.rect = self.image.get_rect(center = self.hitbox.center)
+        # end of copy
+
+        if not self.vulnerable:
+            # flicker when hit
+            alpha = self.wave()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
+
+    def cooldowns(self):
+        current_time = pygame.time.get_ticks()
+        if not self.can_attack:
+            if current_time - self.attack_time >= self.attack_cooldown:
+                self.can_attack = True
+
+        if not self.vulnerable:
+            if current_time - self.hit_time >= self.invincibility_duration:
+                self.vulnerable = True
+
+    def get_damage(self, player, attack_type):
+        self.direction = self.get_player_distance_direction(player)[1]
+        if self.vulnerable:
+            self.hit_time = pygame.time.get_ticks()
+            self.vulnerable = False
+
+    def check_death(self):
+        if self.health <= 0:
+            # TODO: add death animations, particles, exp, and item drops
+            self.kill()
+    
+    def hit_reaction(self):
+        if not self.vulnerable:
+            # this will give the enemy a knockback when hit
+            self.direction *= -self.resistance
+
     def update(self):
+        self.hit_reaction()
         self.move(self.speed)
+        # this fn is not being used rn because we do not have animated sprites
+        # self.animate()
+        self.cooldown()
+        self.check_death()
 
     def enemy_update(self, player):
         self.get_status(player)

@@ -42,6 +42,11 @@ class Player(Entity):
 
         self.weapon_obj = Weapon(self, groups)
 
+        # damage timer
+        self.vulverable = True
+        self.hurt_time = None
+        self.invulnerability_duration = 500
+
         self.obstacle_sprites = obstacle_sprites
 
     def import_player_assets(self):
@@ -90,7 +95,7 @@ class Player(Entity):
                     self.attacking = True
                     self.holding_click = True
                     self.attack_time = pygame.time.get_ticks()
-                    print('attack')	
+                    print('player_attack')	
 
                     if self.mouse_pos[0] < SCREEN_WIDTH/2:
                         self.status_direction = 'left'
@@ -169,6 +174,10 @@ class Player(Entity):
             if current_time - self.weapon_switch_time >= self.switch_duration_cooldown:
                 self.can_switch_weapon = True
 
+        if not self.vulverable:
+            if current_time - self.weapon_switch_time >= self.invulnerability_duration:
+                self.vulnerable = True
+
     def animate(self):
         animation = self.animations[self.status_direction + '_' + self.status_action]
 
@@ -180,6 +189,13 @@ class Player(Entity):
         # set the image
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
+
+        # flicker
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
 
     def update(self):
         self.input()

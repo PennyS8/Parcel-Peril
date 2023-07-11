@@ -35,7 +35,6 @@ weapon_data = {
 
 # enemy
 monster_data = {
-    'small_cube': {'health': 100, 'exp': 100, 'damage': 10, 'attack_type': 'melee', 'speed': 3, 'resistance': 3, 'attack_radius':80, 'alert_radius': 360},
-    'large_cube': {'health': 300, 'exp': 100, 'damage': 10, 'attack_type': 'melee', 'speed': 3, 'resistance': 3, 'attack_radius':80, 'alert_radius': 360},
-    'crate_cube': {'health': 500, 'exp': 100, 'damage': 10, 'attack_type': 'melee', 'speed': 3, 'resistance': 3, 'attack_radius':80, 'alert_radius': 360},
+    'tall_flat': {'health': 100, 'exp': 100, 'damage': 10, 'attack_type': 'slam', 'attack_cooldown': 400, 'speed': 1, 'resistance': 3, 'attack_radius':20, 'alert_radius': 360},
+    # 'medium_cube': {'health': 300, 'exp': 100, 'damage': 10, 'attack_type': 'charge', 'attack_cooldown': 400, 'speed': 1, 'resistance': 3, 'attack_radius':20, 'alert_radius': 360},
 }

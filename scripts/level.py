@@ -18,6 +18,10 @@ class Level:
         self.visable_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
 
+        # attack sprites
+        self.attack_sprites = pygame.sprite.Group()
+        self.attackable_sprites = pygame.sprite.Group()
+
         # sprite setup
         self.create_map()
 
@@ -52,16 +56,39 @@ class Level:
                         if col == '4': # this number is from the 'tiled' index of the player entity
                             self.player = Player((x, y), [self.visable_sprites], self.obstacles_sprites)
                         elif col == '10': # this number is from the 'tiled' index of the enemy entity
-                            Enemy('small_cube', (x, y), [self.visable_sprites], self.obstacles_sprites)
+                            Enemy(
+                                'tall_flat', 
+                                (x, y), 
+                                [self.visable_sprites, self.attackable_sprites], 
+                                self.obstacles_sprites,
+                                self.damadge_player)
+
+    def player_attack_logic(self):
+        if self.attack_sprites:
+            for attack_sprite in self.attack_sprites:
+                # this creates a list of all collisions between attack_sprites and attackable_sprites
+                collision_sprites = pygame.sprite.spritecollide(attack_sprite, self.attackable_sprites, False)
+                if collision_sprites is not None:
+                    for target_sprite in collision_sprites:
+                    # you can create destoryables in the level here by checking for sprite_type of target_sprite
+                        target_sprite.get_damage(self.player, attack_sprite.sprite_type)
+
+    def damadge_player(self, amount, attack_type):
+        if self.player.vulnerable:
+            self.player.health -= amount
+            self.player.vulnerable = False
+            self.player.hurt_time = pygame.time.get_ticks()
+            # TODO: spawn particles
 
     def run(self):
         # update and draw the game
         self.visable_sprites.custom_draw(self.player)
         self.visable_sprites.update()
         self.visable_sprites.enemy_update(self.player)
+        self.player_attack_logic()
         self.ui.display(self.player)
 
-
+################################################################
 
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
