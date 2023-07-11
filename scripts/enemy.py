@@ -2,6 +2,7 @@ import pygame
 from settings import *
 from entity import Entity
 from support import *
+from pygame import Vector2
 
 class Enemy(Entity):
     def __init__(self, monster_name, pos, groups, obstacle_sprites):
@@ -28,11 +29,46 @@ class Enemy(Entity):
         self.attack_damage = monster_info['damage']
         self.resistance = monster_info['resistance']
         self.attack_radius = monster_info['attack_radius']
-        self.notice_radius = monster_info['notice_radius']
+        self.notice_radius = monster_info['alert_radius']
         self.attack_type = monster_info['attack_type']
 
     def import_graphics(self, name):
+        pass
         enemy_path = f'graphics/enemies/{name}.png'
+
+    def get_player_distance_direction(self, player):
+        enemy_vec = Vector2(self.rect.center)
+        player_vec = Vector2(player.rect.center)
+
+        distance = (player_vec - enemy_vec).magnitude()
+        if distance > 0:
+            direction = (player_vec - enemy_vec).normalize()
+        else:
+            direction = Vector2()
+
+        return (distance, direction)
+
+    def get_status(self, player):
+        distance = self.get_player_distance_direction(player)[0]
+        
+        if distance <= self.attack_radius:
+            self.status = 'attack'
+        elif distance <= self.notice_radius:
+            self.status = 'move'
+        else:
+            self.status = 'idle'
+
+    def actions(self, player):
+        if self.status == 'attack':
+            print('attack')
+        elif self.status =='move':
+            self.direction = self.get_player_distance_direction(player)[1]
+        else: # idle
+            self.direction = Vector2()
 
     def update(self):
         self.move(self.speed)
+
+    def enemy_update(self, player):
+        self.get_status(player)
+        self.actions(player)
