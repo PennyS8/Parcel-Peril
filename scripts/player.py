@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.status_action = 'idle'
         self.status_direction = 'left'
         self.frame_index = 0
-        self.animation_speed = 0.15
+        self.animation_speed = ANIMATION_SPEED
 
         # stats
         self.stats = {'health': 100, 'speed': 5, 'attack': 10}

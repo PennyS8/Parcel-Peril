@@ -24,6 +24,9 @@ UI_BORDER_COLOR_ACTIVE = 'gold'
 # graphics 'green' screen
 GREEN_SCREEN_COLOR = (255, 0, 255)
 
+# animation speed 60 * 0.15 frames a second
+ANIMATION_SPEED = 0.15
+
 # note: weapon sprite imgs are centered at the shoulder, then we can rotate around the center of the img an not need to
 # translate them to keep the sholder matching with the player body
 weapon_data = {

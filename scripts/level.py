@@ -6,6 +6,7 @@ from debug import debug
 from support import *
 from pygame import image
 from ui import UI
+from particles import AnimationPlayer
 
 class Level:
     def __init__(self):
@@ -22,6 +23,9 @@ class Level:
 
         # user interface
         self.ui = UI()
+
+        # particles
+        self.animation_player = AnimationPlayer()
 
     def create_map(self):
         layout = {
